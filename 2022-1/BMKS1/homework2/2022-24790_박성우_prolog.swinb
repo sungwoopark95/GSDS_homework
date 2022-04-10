@@ -1,0 +1,327 @@
+<div class="notebook">
+
+<div class="nb-cell markdown" name="md1">
+# Assignment 2: Bill Of Materials (BOM) Data on Prolog
+
+### Due: Fri May 15th, 23:59
+
+Assignment submitted after its deadline will be penalized one percent from the total score for every five minutes late. SNU eTL submissions are always timestamped, so submitting electronically is a reliable way to guarantee you get the earliest possible time of submission. We will not accept any email submission.
+
+Ex) Suppose that a student A submitted the homework 7 minutes late. Then 2% will be deducted from his or her assignment score. We will calculate Deducted Points according to the following equation: *Total Possible Points * (1 - 0.01 * ceil(delay / 5min))*
+
+### Submission
+
+After you have completed the assignment, you need to submit the following deliverable:
+
+ - hw2.zip - Download the swish notebook, compress (zip) the downloaded file, and submit it to the SNU eTL. You can download the swish notebook file using *File -&gt; Download Tab* above.
+ 
+### Score (Total 10 points)
+ - Question A (*2 pts*)
+ - Question B (*2 pts*)
+ - Question C (*3 pts*)
+ - Question D (*3 pts*)
+ - Bonus Question (*extra 2 pts*)
+  - You can earn bonus points, but your score will be capped at 10 (If you get 9 pts in A~D and get extra 2 pts from bonus question, then you will get a total of 10 pts not 11).
+  
+## Bill Of Materials Data
+A bill of materials (BOM) is a list of the raw materials, sub-assemblies, intermediate assemblies, sub-components, parts, and the quantities of each needed to manufacture an end product.
+
+[Reference: Wikipedia](https://en.wikipedia.org/wiki/Bill_of_materials)
+
+The following *Products* table and *BOM* table represent the product-company and sub-component relationship respectively.
+</div>
+
+<div class="nb-cell html" name="htm2">
+<img src="https://raw.githubusercontent.com/jhleepidl/2022_Spring_BKMS/main/bom_products_table.png" width="100%">
+</div>
+
+<div class="nb-cell markdown" name="md3">
+For example, to make *product 104*, one *product 251* and two *products 28* are required, and to make *product 28*, *product 130* and *product 195* are required.
+
+A diagram of the hierarchical bill of materials is as follows:
+</div>
+
+<div class="nb-cell html" name="htm3">
+<img src="https://raw.githubusercontent.com/jhleepidl/2022_Spring_BKMS/main/bom_example_modified.png" width="100%">
+</div>
+
+<div class="nb-cell markdown" name="md21">
+Numbers in the rectangle represents *Product ID*, and arrows are to show the direction of the relationship between *two Product IDs* in the BOM Table (Pid_parent -&gt; Pid_sub).
+</div>
+
+<div class="nb-cell markdown" name="md2">
+## Load BOM Data to Prolog
+
+First, load two files 'Products.csv', 'BOM.csv' to Prolog.
+
+We will refer to swish data_sources examples to import csv files.
+ - ref: [Accessing external *data*](example/data_source.swinb) (CSV, SPARQL, etc.)
+
+The Prolog program cell below will import 'Products.csv' and 'BOM.csv'
+</div>
+
+<div class="nb-cell program" data-background="true" name="p1">
+:- data_source(csv1,
+               csv('https://raw.githubusercontent.com/jhleepidl/2022_Spring_BKMS/main/Products.csv',
+                   [])).
+
+products(Pid, Product, Company, Unitprice) :-
+    csv1{'PID':Pid, 'Product':Product, 'Company':Company, 'Unit_price':Unitprice}.
+:- data_source(csv2,
+               csv('https://raw.githubusercontent.com/jhleepidl/2022_Spring_BKMS/main/BOM.csv',
+                   [])).
+
+bom(Pidsub, Pidparent, Quant) :-
+    csv2{'Pid_sub':Pidsub, 'Pid_parent':Pidparent, 'Quantity':Quant}.
+</div>
+
+<div class="nb-cell markdown" name="md4">
+You can check the rows using queries below:
+</div>
+
+<div class="nb-cell query" name="q1">
+products(Pid, Product, Company, Unitprice).
+</div>
+
+<div class="nb-cell markdown" name="md5">
+The result of query below returns 'Pidsub = Quantity'.
+
+But, it is not an error because Pidsub = Quantity = 1.
+</div>
+
+<div class="nb-cell query" name="q2">
+bom(Pidsub, Pidparent, Quantity).
+</div>
+
+<div class="nb-cell markdown" name="md14">
+You can also count the rows of each data.
+</div>
+
+<div class="nb-cell query" name="q5">
+aggregate_all(count, (products(Pid, Product, Company, Unitprice)), Count).
+</div>
+
+<div class="nb-cell html" name="htm1">
+
+</div>
+
+<div class="nb-cell query" name="q6">
+aggregate_all(count, (bom(Pidsub, Pidparent, Quantity)), Count).
+</div>
+
+<div class="nb-cell markdown" name="md6">
+## Question A (2 pts)
+
+Write a query with your own rule using *products()* or *bom()* predicate.
+
+Ex) Find all products name and manufacturer whose unit price is larger than X. 
+
+Hint: See *Practice Note 2: Prolog* p.26-30
+</div>
+
+<div class="nb-cell program" name="p4">
+%TODO: write your own rule
+high_price(Pname, Manufacturer, Price) :-
+    products(_Pid, Pname, Manufacturer, Unit_price),
+    Unit_price &gt; Price.
+</div>
+
+<div class="nb-cell query" name="q3">
+%TODO: write your own query using the rule above
+Price = 100,
+high_price(Pname, Manufacturer, Price)
+</div>
+
+<div class="nb-cell markdown" name="md7">
+## Question B (2 pts)
+
+Complete the rule *supplies(CompanyFrom, CompanyTo, ProductA, ProductB)* in the program cell below.
+
+*supplies(CompanyFrom, CompanyTo, ProductA, ProductB)* rule is true when below conditions are all true.
+
+ - *CompanyFrom* is the manufacturer of *ProductA*
+ - *CompanyTo* is the manufacturer of *ProductB*
+ - *ProductA* is the sub-component of *ProductB*
+ 
+Note that *ProductA* and *ProductB* are variables for product names
+</div>
+
+<div class="nb-cell program" data-background="true" name="p2">
+supplies(CompanyFrom, CompanyTo, ProductA, ProductB) :-
+    %TODO: Define supplies rule
+    products(PidA, ProductA, CompanyFrom, _UnitpriceA),
+    products(PidB, ProductB, CompanyTo, _UnitpriceB),
+    bom(PidA, PidB, _Quantity).
+</div>
+
+<div class="nb-cell markdown" name="md8">
+You can test the output with the query below
+</div>
+
+<div class="nb-cell query" name="q4">
+supplies(Company,'Ampine',Sub,Parent).
+</div>
+
+<div class="nb-cell markdown" name="md9">
+The result should be as follows:
+</div>
+
+<div class="nb-cell html" name="htm4">
+<img src="https://raw.githubusercontent.com/jhleepidl/2022_Spring_BKMS/main/QB_result.png" width="40%">
+</div>
+
+<div class="nb-cell markdown" name="md10">
+## Question C (3 pts)
+
+The *checkconnected()* checks whether two companies are connected via sub-component relationships.
+
+Complete *trace(ProductA, ProductB, Visited, Path)* rule below to recursively find path between products
+
+You may refer to Prolog list implementation to solve this question.
+ - [Prolog list tutorial](https://www.cpp.edu/~jrfisher/www/prolog_tutorial/2_7.html)
+
+#### [Hint](https://www.cpp.edu/~jrfisher/www/prolog_tutorial/2_15.html)
+</div>
+
+<div class="nb-cell program" data-background="true" name="p3">
+checkconnected(CompanyFrom, CompanyTo, Path):-
+    products(_PidA, ProductA, CompanyFrom, _UnitPriceA),
+    products(_PidB, ProductB, CompanyTo, _UnitPriceB),
+    trace(ProductA, ProductB, [ProductA], Q),
+    reverse(Q, Path).
+
+% Base case of recursion
+trace(ProductA, ProductB, P, [ProductB|P]):-
+    supplies(_CompanyFrom, _CompanyTo, ProductA, ProductB).
+
+trace(ProductA, ProductB, Visited, Path) :-
+    %TODO: Define trace rule to recursively find path
+    supplies(_CompanyFrom, _CompanyTo, ProductA, Intermediate),            
+    Intermediate \== ProductB,
+    \+member(Intermediate, Visited),
+    trace(Intermediate, ProductB, [Intermediate|Visited], Path).
+</div>
+
+<div class="nb-cell markdown" name="md16">
+You can test the output with the query below
+</div>
+
+<div class="nb-cell query" name="q9">
+checkconnected(Company,'Ampine',Chain).
+</div>
+
+<div class="nb-cell markdown" name="md17">
+The result should be as follows:
+</div>
+
+<div class="nb-cell html" name="htm6">
+<img src="https://raw.githubusercontent.com/jhleepidl/2022_Spring_BKMS/main/QC_result.png" width="40%">
+</div>
+
+<div class="nb-cell html" name="htm5">
+
+</div>
+
+<div class="nb-cell markdown" name="md11">
+## Question D (3 pts)
+
+Analyze the pros and cons of using Prolog as a database management system.
+
+You can compare Prolog with PostgreSQL.
+</div>
+
+<div class="nb-cell markdown" name="md12">
+-----------------------------------------------------
+TODO: Write the pros and cons of using Prolog as a database management system.
+
+*Double-click* here to modify this markdown cell
+
+* ``Prolog``
+	
+    * ``Prolog``는 이미 알려지거나 정의한 **Fact**, 그리고 사실들의 나열 및 논리적 관계로서 만들어지는 **Rule** 을 통해 데이터를 처리하는 시스템이다.
+    
+    * 즉, *Knowledge* 기반 데이터 처리 언어인 동시에, 항상 **Predicate** 을 만들어 해당 "조건"에 참인 결과들, 또는 특정한 argument가 해당 조건에 부합하는지 여부를 중심으로 보여주게 된다.
+	
+    * 따라서 특정 조건에 부합하는 데이터를 찾거나, 결과가 나오게 되는 과정, 또는 특정 entity 사이에 존재하는 경로 등을 추론하기에는 좋은 시스템이다.
+    
+    * 하지만 대규모 데이터베이스를 관리하고, 서로 다른 두 테이블 사이에 맺는 관계를 파악하기에는 한계가 있는 것으로 보인다.
+    
+* ``SQL``
+	
+    * Data, 특히 정형 데이터 사이에 존재하는 **관계** 를 중심으로 살펴보는 데 특화된 데이터 처리 언어로서, 테이블 사이의 관계 파악 및 여러 테이블을 동시에 통합하여 인사이트를 도출하는 데 강점이 있는 언어이다.
+    * 따라서 ``SQL``을 활용해 대규모 데이터베이스를 관리하고 여러 데이터의 조합을 통한 결과를 파악하는 것은 쉽지만, 위의 supply chain 문제처럼 특정 entity로부터 다른 entity로 도달하는 경로 또는 값이 나오게 되는 중간 과정을 파악하기에는 한계가 있다. 다시 말해, ``SQL``을 활용해 인과추론 작업을 수행하는 것은 어려워 보인다.
+
+-----------------------------------------------------
+
+
+</div>
+
+<div class="nb-cell markdown" name="md13">
+## Bonus Question (extra 2 pts)
+
+Write a query that visualize product assembly path.
+
+We will use graphviz to render graphs.
+ - ref: [Using Graphviz to display graphs](example/render_graphviz.swinb)
+</div>
+
+<div class="nb-cell program" data-background="true" name="p5">
+:- use_rendering(graphviz).
+</div>
+
+<div class="nb-cell markdown" name="md18">
+You can visualize graphs using queries like below.
+
+Feel free check out more visualization examples in the reference.
+</div>
+
+<div class="nb-cell query" name="q10">
+PATH = ('X' -&gt; 'Y' -&gt; 'Z'),
+X = dot(digraph([PATH])).
+</div>
+
+<div class="nb-cell markdown" name="md15">
+Use the program provided below to create a query that visualizes the assembly path.
+
+You are allow to modify the cell below.
+</div>
+
+<div class="nb-cell program" name="p6">
+product_supply(ProductA, ProductB) :-
+    products(PidA,ProductA,_CompanyFrom,_UnitpriceA),
+    products(PidB,ProductB,_CompanyTo,_UnitpriceB),
+    bom(PidA, PidB, _Quantity).
+
+checkpath(ProductA, ProductB, Path):-
+    tracearrow(ProductA, ProductB, ProductA, Path),
+    \+product_supply(_Anyproduct,ProductA).
+
+tracearrow(ProductA, ProductB, P, ProductB -&gt; P):-
+    product_supply(ProductA, ProductB).
+
+tracearrow(ProductA, ProductB, Visited, Path) :-
+    product_supply(ProductA, ProductC),
+    ProductC \== ProductB,
+    \+member(ProductC, Visited),
+    tracearrow(ProductC, ProductB, ProductC -&gt; Visited, Path).
+</div>
+
+<div class="nb-cell markdown" name="md19">
+Write a query to visualize assembly path from final product 'T21P'
+</div>
+
+<div class="nb-cell query" name="q8">
+%TODO: write a query to visualize assembly path from final product 'T21P'
+checkpath(_ProductA, 'T21P', Path),
+X = dot(digraph([Path])).
+</div>
+
+<div class="nb-cell markdown" name="md20">
+The result should be as follows:
+</div>
+
+<div class="nb-cell html" name="htm7">
+<img src="https://raw.githubusercontent.com/jhleepidl/2022_Spring_BKMS/main/QE_result.png" width="30%">
+</div>
+
+</div>
