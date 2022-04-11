@@ -7,11 +7,11 @@
 using namespace std;
 
 /* Shape */
-Shape::Shape(double x) {
+Shape::Shape(float x) {
     length = x;
 }
 
-double Shape::area(double x) {
+float Shape::area(float x) {
     return 1.0;
 }
 
@@ -20,9 +20,9 @@ void Shape::print() {
 }
 
 /* Square */
-Square::Square(double x) : Shape(x) {}
+Square::Square(float x) : Shape(x) {}
 
-double Square::area(double x) {
+float Square::area(float x) {
     return x * x;
 }
 
@@ -31,11 +31,11 @@ void Square::print() {
 }
 
 /* Equilateral */
-Equilateral::Equilateral(double x) : Shape(x) {}
+Equilateral::Equilateral(float x) : Shape(x) {}
 
-double Equilateral::area(double x) {
-    double width = x;
-    double height = (0.5) * width * tan(M_PI / 3);
+float Equilateral::area(float x) {
+    float width = x;
+    float height = (0.5) * width * tan(M_PI / 3);
     return 0.5 * width * height;
 }
 

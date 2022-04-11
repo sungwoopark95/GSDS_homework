@@ -3,24 +3,24 @@
 // Fill in
 class Shape {
     protected:
-    double length;
+    float length;
 
     public:
-    Shape(double x);
-    virtual double area(double x);
+    Shape(float x);
+    virtual float area(float x);
     void print();
 };
 
 class Square : public Shape {
     public:
-    Square(double x);
-    virtual double area(double x);
+    Square(float x);
+    virtual float area(float x);
     void print();   
 };
 
 class Equilateral : public Shape {
     public:
-    Equilateral(double x);
-    virtual double area(double x);
+    Equilateral(float x);
+    virtual float area(float x);
     void print();
 };
